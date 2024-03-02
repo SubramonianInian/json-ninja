@@ -4,10 +4,39 @@ import JSONTreee from './components/JsonTree'
 import { ActiionButtons } from './types/ActionButtons'
 import NavBar from './components/Navbar'
 import { DummyJson } from './constants/DummyJson'
+import { ActionButtonProps } from './interfaces/actionButtonProps'
 
 function App() {
     const [value, setValue] = useState<string>()
     const inputRef = useRef<HTMLTextAreaElement>(null)
+
+    const buttonsData: ActiionButtons[] = [
+        {
+            label: 'Clear',
+            onClick: () => {
+                if (inputRef.current?.value) {
+                    setValue('')
+                    inputRef.current.value = ''
+                }
+            },
+        },
+        {
+            label: 'Beautify',
+            onClick: () => Beautify(),
+        },
+        {
+            label: 'Remove Formatting',
+            onClick: () => removeFormatting(),
+        },
+        {
+            label: 'Dummy JSON',
+            onClick: () => AddDummyJson(),
+        },
+        {
+            label: 'JSON Viewer',
+            onClick: () => handleOnClick(),
+        },
+    ]
 
     /**
      * Method to set data for the json viewer
@@ -48,38 +77,10 @@ function App() {
      * Component to generate all the action buttons for json processing
      * @returns
      */
-    const Actions = () => {
-        const buttonsData: ActiionButtons[] = [
-            {
-                label: 'Clear',
-                onClick: () => {
-                    if (inputRef.current?.value) {
-                        setValue('')
-                        inputRef.current.value = ''
-                    }
-                },
-            },
-            {
-                label: 'Beautify',
-                onClick: () => Beautify(),
-            },
-            {
-                label: 'Remove Formatting',
-                onClick: () => removeFormatting(),
-            },
-            {
-                label: 'Dummy JSON',
-                onClick: () => AddDummyJson(),
-            },
-            {
-                label: 'JSON Viewer',
-                onClick: () => handleOnClick(),
-            },
-        ]
-
+    const Actions: React.FC<ActionButtonProps> = ({ actionButtons }) => {
         return (
             <div className="flex gap-2 justify-center items-center">
-                {buttonsData.map((button, index) => (
+                {actionButtons?.map((button, index) => (
                     <button
                         key={index}
                         className="mt-2 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
@@ -95,23 +96,26 @@ function App() {
     return (
         <>
             <NavBar />
+            <div className="flex justify-around mb-2">
+                <Actions actionButtons={buttonsData} />
+            </div>
             <div className="main-wrapper">
                 <div className="left">
-                    <Actions />
                     <textarea
                         id="message"
                         ref={inputRef}
                         autoFocus
-                        className="resize-none w-full h-full block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="outline-none resize-none w-full h-full block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg "
                         placeholder="Enter your JSON here..."
                     ></textarea>
                 </div>
                 <div className="right ">
+                    <Actions actionButtons={null} />
                     <div
                         style={{
                             backgroundColor: '#282C34',
                         }}
-                        className="overflow-y-scroll resize-none w-full h-full block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        className="outline-none resize-none w-full h-full block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg "
                     >
                         <JSONTreee data={value ?? ''} />
                     </div>
