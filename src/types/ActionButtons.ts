@@ -1,4 +1,7 @@
+import { ReactElement } from 'react'
+
 export type ActiionButtons = {
-    label: string
+    label: ReactElement
     onClick: () => void
+    isActive: boolean
 }

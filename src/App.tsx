@@ -1,68 +1,146 @@
 import { useRef, useState } from 'react'
 import './App.css'
-import JSONTreee from './components/JsonTree'
+// import JSONTreee from './components/JsonTree'
 import { ActiionButtons } from './types/ActionButtons'
 import NavBar from './components/Navbar'
 import { DummyJson } from './constants/DummyJson'
 import { ActionButtonProps } from './interfaces/actionButtonProps'
+import { editor } from 'monaco-editor'
+import MonacoEditor from './components/Editor'
+import {
+    SlTrash,
+    SlCloudDownload,
+    SlMagicWand,
+    SlBan,
+    SlGhost,
+    SlWrench,
+    SlBookOpen,
+} from 'react-icons/sl'
+import ReactJson from 'react-json-view'
 
 function App() {
-    const [value, setValue] = useState<string>()
-    const inputRef = useRef<HTMLTextAreaElement>(null)
+    const [value, setValue] = useState<object>({ test: 'test' })
+    const editorRef = useRef<editor.IStandaloneCodeEditor>()
 
     const buttonsData: ActiionButtons[] = [
         {
-            label: 'Clear',
+            isActive: true,
+            label: (
+                <span className="flex justify-between gap-2 items-center">
+                    <SlTrash /> Clear
+                </span>
+            ),
             onClick: () => {
-                if (inputRef.current?.value) {
-                    setValue('')
-                    inputRef.current.value = ''
-                }
+                editorRef.current?.setValue(
+                    JSON.stringify(
+                        JSON.parse(
+                            '{"Instruction": "Enter your JSON here..."}'
+                        ),
+                        null,
+                        2
+                    )
+                )
             },
         },
         {
-            label: 'Beautify',
+            isActive: true,
+            label: (
+                <span className="flex justify-between gap-2 items-center">
+                    <SlMagicWand /> Beautify
+                </span>
+            ),
             onClick: () => Beautify(),
         },
         {
-            label: 'Remove Formatting',
+            isActive: true,
+            label: (
+                <span className="flex justify-between gap-2 items-center">
+                    <SlBan /> Remove Formatting
+                </span>
+            ),
             onClick: () => removeFormatting(),
         },
         {
-            label: 'Dummy JSON',
+            isActive: true,
+            label: (
+                <span className="flex justify-between gap-2 items-center">
+                    <SlGhost /> Dummy JSON
+                </span>
+            ),
             onClick: () => AddDummyJson(),
         },
         {
-            label: 'JSON Viewer',
+            isActive: true,
+            label: (
+                <span className="flex justify-between gap-2 items-center">
+                    <SlBookOpen /> JSON Viewer
+                </span>
+            ),
             onClick: () => handleOnClick(),
         },
+        {
+            isActive: true,
+            label: (
+                <span className="flex justify-between gap-2 items-center">
+                    <SlCloudDownload /> Download
+                </span>
+            ),
+            onClick: () => handleDownload(),
+        },
+        {
+            isActive: false,
+            label: (
+                <span className="flex justify-between gap-2 items-center">
+                    <SlWrench /> Generate JSON
+                </span>
+            ),
+            onClick: () => handleDownload(),
+        },
     ]
+
+    /**
+     * Method to download the content as a JSON file
+     */
+    const handleDownload = () => {
+        const element = document.createElement('a')
+        const file = new Blob(
+            [
+                JSON.stringify(
+                    JSON.parse(editorRef?.current?.getValue() ?? ''),
+                    null,
+                    2
+                ),
+            ],
+            { type: 'text/plain' }
+        )
+        element.href = URL.createObjectURL(file)
+        element.download = 'formatted-content.json'
+        document.body.appendChild(element)
+        element.click()
+    }
 
     /**
      * Method to set data for the json viewer
      */
     const handleOnClick = () => {
-        const inputJsonValue: string = inputRef.current!.value
-        setValue(JSON.parse(inputJsonValue))
+        setValue(JSON.parse(editorRef?.current?.getValue() ?? ''))
     }
 
     /**
      * Method to remove all formatting from input json string
      */
     const removeFormatting = () => {
-        const inputJsonValue: string = inputRef.current!.value
-        inputRef.current!.value = JSON.stringify(JSON.parse(inputJsonValue))
+        editorRef.current?.setValue(
+            JSON.stringify(JSON.parse(editorRef.current.getValue()))
+        )
     }
 
     /**
      * Method to format the json data
      */
     const Beautify = () => {
-        const inputJsonValue: string = inputRef.current!.value
-        inputRef.current!.value = JSON.stringify(
-            JSON.parse(inputJsonValue),
-            null,
-            2
+        editorRef.current?.setValue(
+            JSON.stringify(JSON.parse(editorRef.current.getValue()), null, 2)
         )
     }
 
@@ -70,7 +148,7 @@ function App() {
      * Method to return dummy json data
      */
     const AddDummyJson = () => {
-        inputRef.current!.value = JSON.stringify(DummyJson, null, 2)
+        editorRef.current?.setValue(JSON.stringify(DummyJson, null, 2))
     }
 
     /**
@@ -79,18 +157,25 @@ function App() {
      */
     const Actions: React.FC<ActionButtonProps> = ({ actionButtons }) => {
         return (
-            <div className="flex gap-2 justify-center items-center">
-                {actionButtons?.map((button, index) => (
-                    <button
-                        key={index}
-                        className="mt-2 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-                        onClick={button.onClick}
-                    >
-                        {button.label}
-                    </button>
-                ))}
+            <div className="flex gap-2 justify-center items-center absolute top-11">
+                {actionButtons?.map(
+                    (button, index) =>
+                        button.isActive && (
+                            <button
+                                key={index}
+                                className="mt-2 py-1 px-3 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                                onClick={button.onClick}
+                            >
+                                {button.label}
+                            </button>
+                        )
+                )}
             </div>
         )
+    }
+
+    const setEditorContext = (editor: editor.IStandaloneCodeEditor) => {
+        editorRef.current = editor
     }
 
     return (
@@ -101,23 +186,45 @@ function App() {
             </div>
             <div className="main-wrapper">
                 <div className="left">
-                    <textarea
-                        id="message"
-                        ref={inputRef}
-                        autoFocus
-                        className="outline-none resize-none w-full h-full block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg "
-                        placeholder="Enter your JSON here..."
-                    ></textarea>
-                </div>
-                <div className="right ">
-                    <Actions actionButtons={null} />
                     <div
                         style={{
                             backgroundColor: '#282C34',
                         }}
-                        className="outline-none resize-none w-full h-full block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg "
+                        className="outline-none resize-none w-full h-full block"
                     >
-                        <JSONTreee data={value ?? ''} />
+                        <MonacoEditor
+                            defaultValue={JSON.stringify(
+                                JSON.parse(
+                                    '{"Instruction": "Enter your JSON here..."}'
+                                ),
+                                null,
+                                2
+                            )}
+                            setEditorContext={setEditorContext}
+                        />
+                    </div>
+                </div>
+                <div className="right ">
+                    <div
+                        style={{
+                            backgroundColor: '#282C34',
+                        }}
+                        className="outline-none resize-none w-full h-full block"
+                    >
+                        {/* <JSONTreee data={value} /> */}
+                        <ReactJson
+                            style={{ overflow: 'scroll' }}
+                            // onEdit={(e) => {
+                            //     console.log(e)
+                            // }}
+                            // onDelete={(e) => {
+                            //     console.log(e)
+                            // }}
+                            theme={'ashes'}
+                            src={value}
+                            displayDataTypes
+                            displayObjectSize
+                        />
                     </div>
                 </div>
             </div>

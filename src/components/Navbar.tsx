@@ -1,3 +1,5 @@
+import { GiNinjaHead } from 'react-icons/gi'
+
 const NavBar = () => {
     return (
         <nav className="border-gray-200 dark:bg-gray-900">
@@ -6,11 +8,7 @@ const NavBar = () => {
                     href="https://flowbite.com/"
                     className="flex items-center space-x-3 rtl:space-x-reverse"
                 >
-                    <img
-                        src="https://flowbite.com/docs/images/logo.svg"
-                        className="h-8"
-                        alt="Flowbite Logo"
-                    />
+                    <GiNinjaHead className="text-4xl text-white" />
                     <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">
                         JSON Ninja
                     </span>

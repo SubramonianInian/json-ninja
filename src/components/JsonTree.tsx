@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { SlTrash, SlPencil } from 'react-icons/sl'
 
 interface JSONTreeProps {
     data: string
@@ -7,19 +8,19 @@ interface JSONTreeProps {
 
 const JSONTreee: React.FC<JSONTreeProps> = ({ data, rootNode }) => {
     const [collapsed, setCollapsed] = useState(false)
+    const [cloneData, setCloneData] = useState(data)
 
     const toggleCollapse = () => {
         setCollapsed((prevCollapsed) => !prevCollapsed)
     }
 
     const renderNode = (key: string, value: string | number) => {
-        console.log(typeof value)
-        console.log(value)
         if (typeof value === 'object' && value !== null) {
             return <JSONTreee key={key} data={value} rootNode={key} />
         } else {
             return (
                 <div
+                    className="flex gap-2 items-center"
                     key={key}
                     style={{
                         color: 'white',
@@ -44,6 +45,24 @@ const JSONTreee: React.FC<JSONTreeProps> = ({ data, rootNode }) => {
                         {' '}
                         {value}
                     </span>
+                    <div className=" mx-auto flex gap-3">
+                        <SlPencil
+                            className="text-sm cursor-pointer hover:text-red-500"
+                            color="white"
+                            onClick={() => {}}
+                        />
+                        <SlTrash
+                            className="text-sm cursor-pointer hover:text-red-500"
+                            color="white"
+                            onClick={() => {
+                                delete data[key]
+                                const olddata = cloneData
+                                console.log(olddata)
+                                console.log(delete olddata[key])
+                                setCloneData(olddata)
+                            }}
+                        />
+                    </div>
                 </div>
             )
         }
@@ -52,6 +71,7 @@ const JSONTreee: React.FC<JSONTreeProps> = ({ data, rootNode }) => {
     return (
         <div
             style={{
+                marginTop: '3px',
                 marginLeft: '20px',
                 backgroundColor: '#282C34',
                 fontFamily: 'monospace',
@@ -60,34 +80,76 @@ const JSONTreee: React.FC<JSONTreeProps> = ({ data, rootNode }) => {
         >
             <span onClick={toggleCollapse} style={{ cursor: 'pointer' }}>
                 {collapsed ? (
-                    <span
-                        style={{
-                            color: '#DA5969',
-                            textTransform: 'capitalize',
-                        }}
-                    >
-                        ➕{' '}
-                        {/* {`${rootNode ? rootNode : 'Root'}: ${Object.keys(data).length} ${Array.isArray(data) ? 'items' : 'keys'}`} */}
-                        {`${rootNode ? rootNode : 'Root'}`}
-                    </span>
+                    <>
+                        <div className=" mx-auto flex gap-3">
+                            <span
+                                style={{
+                                    color: '#DA5969',
+                                    textTransform: 'capitalize',
+                                }}
+                            >
+                                ➕{' '}
+                                {/* {`${rootNode ? rootNode : 'Root'}: ${Object.keys(data).length} ${Array.isArray(data) ? 'items' : 'keys'}`} */}
+                                {`${rootNode ? rootNode : 'Root'}`}
+                            </span>
+                            <SlPencil
+                                className="text-sm cursor-pointer hover:text-red-500"
+                                color="white"
+                                onClick={() => {}}
+                            />
+                            <SlTrash
+                                className="text-sm cursor-pointer hover:text-red-500"
+                                color="white"
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    delete data[rootNode!]
+                                    // setRenderNow((prev) => !prev)
+                                }}
+                            />
+                        </div>
+                    </>
                 ) : (
-                    <span
-                        style={{
-                            color: '#DA5969',
-                            textTransform: 'capitalize',
-                        }}
-                    >
-                        ➖{' '}
-                        {/* {`${rootNode ? rootNode : 'Root'}: ${Object.keys(data).length} ${Array.isArray(data) ? 'items' : 'keys'}`} */}
-                        {`${rootNode ? rootNode : 'Root'}`}
-                    </span>
+                    <>
+                        <div className=" mx-auto flex gap-3">
+                            <span
+                                style={{
+                                    color: '#DA5969',
+                                    textTransform: 'capitalize',
+                                }}
+                            >
+                                ➖{' '}
+                                {/* {`${rootNode ? rootNode : 'Root'}: ${Object.keys(data).length} ${Array.isArray(data) ? 'items' : 'keys'}`} */}
+                                {`${rootNode ? rootNode : 'Root'}`}
+                            </span>{' '}
+                            <SlPencil
+                                className="text-sm cursor-pointer hover:text-red-500"
+                                color="white"
+                                onClick={() => {}}
+                            />
+                            <SlTrash
+                                className="text-sm cursor-pointer hover:text-red-500"
+                                color="white"
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    console.log(rootNode)
+                                    delete data[rootNode as string]
+                                    console.log(data)
+                                    // setRenderNow((prev) => !prev)
+                                }}
+                            />
+                        </div>
+                    </>
                 )}{' '}
             </span>
             {!collapsed && (
                 <>
-                    {Object.keys(data as string).map(
+                    {Object.keys(cloneData as string).map(
                         (key: string, index: number) => (
-                            <div style={{ marginLeft: '40px' }} key={index}>
+                            <div
+                                style={{ marginLeft: '40px', marginTop: '3px' }}
+                                key={index}
+                            >
                                 {renderNode(key, data[key])}
                             </div>
                         )
